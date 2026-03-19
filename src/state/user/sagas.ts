@@ -180,20 +180,26 @@ function* remindPasswordSaga(data: TAction) {
   }
 }
 
+function setAuthDebug(info: Record<string, unknown>) {
+  try {
+    (window as any).__authDebug = { ...(window as any).__authDebug, ...info, t: Date.now() }
+  } catch (_) {}
+}
+
 function* initUserSaga() {
-  console.log('[initUser] saga started')
+  setAuthDebug({ step: 'started' })
   try {
     const rawTokens = localStorage.getItem('state.user.tokens')
     const allKeys = Object.keys(localStorage).filter(k => k.includes('user') || k.includes('token'))
-    console.log('[initUser] Keys in localStorage:', allKeys, 'rawTokens length:', rawTokens?.length ?? 'null')
+    setAuthDebug({ rawTokensLen: rawTokens?.length ?? 0, keys: allKeys })
     let tokens: Partial<ITokens> = {}
     try {
       tokens = rawTokens !== null ? JSON.parse(rawTokens) : {}
     } catch (parseErr) {
-      console.warn('[initUser] Invalid JSON:', rawTokens?.slice(0, 50), parseErr)
+      setAuthDebug({ parseError: String(parseErr) })
     }
     if (!tokens.token || !tokens.u_hash) {
-      console.warn('[initUser] No API call. token:', !!tokens.token, 'u_hash:', !!tokens.u_hash, 'parsed keys:', Object.keys(tokens))
+      setAuthDebug({ skipApi: true, hasToken: !!tokens.token, hasHash: !!tokens.u_hash, parsedKeys: Object.keys(tokens) })
       // Проверяем язык в куках
       const savedLang = getCookie('user_lang')
       if (savedLang) {
@@ -208,12 +214,15 @@ function* initUserSaga() {
       return
     }
     yield put({ type: ActionTypes.SET_TOKENS, payload: tokens })
+    setAuthDebug({ step: 'callingApi' })
 
     const user = yield* call(API.getAuthorizedUser)
     if (!user) {
+      setAuthDebug({ step: 'apiReturnedNull' })
       localStorage.removeItem('state.user.tokens')
       return
     }
+    setAuthDebug({ step: 'success', userId: user.u_id })
 
     // Устанавливаем язык из пользователя или из куки
     if (user?.u_lang) {
@@ -242,6 +251,7 @@ function* initUserSaga() {
     }
     yield put(setUser(user))
   } catch (error) {
+    setAuthDebug({ step: 'error', errorMsg: String((error as Error)?.message ?? error) })
     console.error('Error in initUserSaga:', error)
     localStorage.removeItem('state.user.tokens')
   }

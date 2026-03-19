@@ -91,14 +91,39 @@ const App: React.FC<IProps> = ({
     )
   }
 
+  const showAuthDebug = typeof window !== 'undefined' &&
+    (new URLSearchParams(window.location.search).get('debugAuth') === '1' ||
+      localStorage.getItem('debugAuth') === '1')
+
   return (
     <React.Fragment key={`${language.id}_${configStatus}`}>
       <Theme>
         {getMetaTags()}
         <AppRoutes />
         <ModalHost />
+        {showAuthDebug && <AuthDebugOverlay />}
       </Theme>
     </React.Fragment>
+  )
+}
+
+function AuthDebugOverlay() {
+  const [info, setInfo] = React.useState<Record<string, unknown> | null>(null)
+  useEffect(() => {
+    const poll = () => setInfo({ ...(window as any).__authDebug } as Record<string, unknown>)
+    poll()
+    const id = setInterval(poll, 500)
+    return () => clearInterval(id)
+  }, [])
+  return (
+    <div style={{
+      position: 'fixed', bottom: 0, left: 0, right: 0, zIndex: 99999,
+      background: 'rgba(0,0,0,0.9)', color: '#0f0', padding: 12, fontSize: 12,
+      fontFamily: 'monospace', maxHeight: 200, overflow: 'auto',
+    }}>
+      <b>Auth Debug (?debugAuth=1)</b>
+      <pre style={{ margin: '4px 0' }}>{JSON.stringify(info, null, 2)}</pre>
+    </div>
   )
 }
 
