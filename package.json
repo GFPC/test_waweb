@@ -107,6 +107,7 @@
         "yup": "^0.32.11"
     },
     "scripts": {
+        "postinstall": "npx update-browserslist-db@latest || true",
         "start": "run-script-os",
         "start:default": "set NODE_OPTIONS=--openssl-legacy-provider && node scripts/start.js",
         "start:nix": "NODE_OPTIONS=--openssl-legacy-provider node scripts/start.js",

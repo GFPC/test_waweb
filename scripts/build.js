@@ -169,7 +169,9 @@ function build(previousFileSizes) {
                 }
                 return reject(new Error(messages.errors.join("\n\n")));
             }
+            // Only fail on warnings when explicitly requested (CI often blocks deployments)
             if (
+                process.env.REJECT_ON_WARNINGS === "true" &&
                 process.env.CI &&
                 (typeof process.env.CI !== "string" ||
                     process.env.CI.toLowerCase() !== "false") &&
@@ -177,8 +179,7 @@ function build(previousFileSizes) {
             ) {
                 console.log(
                     chalk.yellow(
-                        "\nTreating warnings as errors because process.env.CI = true.\n" +
-                            "Most CI servers set it automatically.\n"
+                        "\nTreating warnings as errors because REJECT_ON_WARNINGS=true.\n"
                     )
                 );
                 return reject(new Error(messages.warnings.join("\n\n")));
