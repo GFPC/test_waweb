@@ -37,6 +37,7 @@ const App: React.FC<IProps> = ({
   }
 
   useEffect(() => {
+    console.log('[App] useEffect: initUser dispatch')
     initUser()
 
     API.activateChatServer()

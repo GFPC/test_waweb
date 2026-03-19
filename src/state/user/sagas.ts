@@ -181,10 +181,19 @@ function* remindPasswordSaga(data: TAction) {
 }
 
 function* initUserSaga() {
+  console.log('[initUser] saga started')
   try {
     const rawTokens = localStorage.getItem('state.user.tokens')
-    const tokens: ITokens = rawTokens !== null ? JSON.parse(rawTokens) : {}
+    const allKeys = Object.keys(localStorage).filter(k => k.includes('user') || k.includes('token'))
+    console.log('[initUser] Keys in localStorage:', allKeys, 'rawTokens length:', rawTokens?.length ?? 'null')
+    let tokens: Partial<ITokens> = {}
+    try {
+      tokens = rawTokens !== null ? JSON.parse(rawTokens) : {}
+    } catch (parseErr) {
+      console.warn('[initUser] Invalid JSON:', rawTokens?.slice(0, 50), parseErr)
+    }
     if (!tokens.token || !tokens.u_hash) {
+      console.warn('[initUser] No API call. token:', !!tokens.token, 'u_hash:', !!tokens.u_hash, 'parsed keys:', Object.keys(tokens))
       // Проверяем язык в куках
       const savedLang = getCookie('user_lang')
       if (savedLang) {
