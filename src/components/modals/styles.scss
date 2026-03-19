@@ -1,3 +1,5 @@
+@use "sass:color";
+
 .overlay {
   cursor: pointer;
   background: rgba(0, 0, 0, 0.17);
@@ -881,7 +883,7 @@
 }
 
 .delete-file-modal {
-  background-color: transparentize(#fff, .1);
+  background-color: color.adjust(#fff, $alpha: -0.1);
 
   &__text {
     margin: 20px auto;
