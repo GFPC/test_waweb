@@ -1,3 +1,4 @@
+@use "sass:color";
 @use '.' as Input;
 
 $border-color: #858585;
@@ -261,20 +262,20 @@ textarea {
     }
 
     &--unofficial {
-      background-color: lighten(yellow, 20%);
+      background-color: color.adjust(yellow, $lightness: 20%);
 
       &:hover,
       &:focus {
-        background-color: darken(yellow, 10%);
+        background-color: color.adjust(yellow, $lightness: -10%);
       }
     }
 
     &--official {
-      background-color: darken(yellow, 10%);
+      background-color: color.adjust(yellow, $lightness: -10%);
 
       &:hover,
       &:focus {
-        background-color: darken(yellow, 20%);
+        background-color: color.adjust(yellow, $lightness: -20%);
       }
     }
   }
